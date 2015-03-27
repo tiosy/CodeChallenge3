@@ -1,5 +1,5 @@
 //
-//  AppDelegate.h
+//  MapViewController.h
 //  CodeChallenge3
 //
 //  Created by Vik Denic on 10/16/14.
@@ -7,9 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Bike.h"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface MapViewController : UIViewController
 
-@property (strong, nonatomic) UIWindow *window;
+@property Bike *selectedBike;
 
 @end
