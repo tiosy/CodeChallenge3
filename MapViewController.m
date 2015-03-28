@@ -35,8 +35,6 @@
     self.mapView.delegate = self;
 
 
- //   37.329732###-121.901782
-
     [self addAnnotationWithPoint:self.selectedBike];
 
 }
@@ -47,7 +45,7 @@
 {
 
 
-    NSString *locationName = bike.bikeLocationString;
+    NSString *locationName = bike.bikeLocation;
     double longitude = bike.longitude;
     double latitude = bike.latitude;
 

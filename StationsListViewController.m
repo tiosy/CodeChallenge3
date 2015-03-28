@@ -18,8 +18,8 @@
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
 @property (strong, nonatomic) IBOutlet UISearchBar *searchBar;
 
-
-
+@property CLLocationManager *locationManager;
+@property CLLocation *userLocation;
 
 @property NSDictionary *bikeJSONDictionary;
 @property NSArray *bikeJSONArray;
@@ -41,6 +41,14 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
 
+    self.locationManager = [CLLocationManager new];
+    [self.locationManager requestAlwaysAuthorization];
+    self.locationManager.delegate = self;
+
+    //get the user location
+    [self.locationManager startUpdatingLocation];
+
+    //
     self.bikeArray = [NSMutableArray new];
     self.filteredBikeArray = [NSMutableArray new];
     self.isFiltered = NO;
@@ -74,6 +82,28 @@
              [self.bikeArray addObject: bike ];
               //each of bikeArray is now a Bike object
          }
+
+
+
+         //Now calculate distance for each bike station
+         for (Bike *bike in self.bikeArray) {
+             CLLocationDistance dis = [self getDistanceFromUserLocationToBikeStation:bike.latitude longitude:bike.longitude];
+             bike.distance = dis;
+         }
+
+
+         //ok now dump the array
+         for (Bike *bike in self.bikeArray) {
+
+             NSLog(@"%@ ==%f\n",bike.stationName,bike.distance);
+        }
+             
+
+
+
+
+
+
 
          //since this Block, a async process, needs to reload tableview
          [self.tableView reloadData];
@@ -161,6 +191,33 @@
 
 
 
+#pragma mark - CLLocationManagerDelegate>
 
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
+{
+    NSLog(@"^^^^^^^%@^^^^%ld",locations, locations.count);
+
+    for (CLLocation *location in locations) {
+        if(location.verticalAccuracy < 50 && location.horizontalAccuracy < 50)
+        {
+            self.userLocation = location;
+
+            [self.locationManager stopUpdatingLocation];
+        }
+        
+    }
+    
+}
+
+#pragma mark - helper methods
+-(CLLocationDistance) getDistanceFromUserLocationToBikeStation:(double) latitude longitude:(double) longitude
+{
+   // CLLocation *
+    CLLocation *location = [[CLLocation alloc] initWithLatitude:latitude longitude:longitude];
+    CLLocationDistance distance = [self.userLocation distanceFromLocation:location];
+
+    return  distance;
+
+}
 
 @end
