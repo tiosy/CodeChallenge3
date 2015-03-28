@@ -12,7 +12,7 @@
 #import <CoreLocation/CoreLocation.h>
 
 
-@interface MapViewController () <MKMapViewDelegate,CLLocationManagerDelegate,UIAlertViewDelegate,UISearchBarDelegate>
+@interface MapViewController () <MKMapViewDelegate,CLLocationManagerDelegate,UIAlertViewDelegate>
 
 @property (strong, nonatomic) IBOutlet MKMapView *mapView;
 @property CLLocationManager *locationManager;
@@ -114,9 +114,8 @@
     NSLog(@"selected longitude %f", longitude);
 
 
-
+    //Creat CLLocation with latitude and logitude
     CLLocation *location = [[CLLocation alloc] initWithLatitude:latitude longitude:longitude];
-
     [self reverseGeocodeLocation:location];
 
 }
@@ -125,35 +124,15 @@
 #pragma mark AlertView's UIAlertViewDelegate Protocol
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-
-
-    //Example using button index
-    if(buttonIndex == 0) // Try Again button
-    {
-        //...
-    }
-    if(buttonIndex == 1) // Cancel button
-    {
-        //...
-    }
-
-
-
-
+    //no action , just display actionview in this project
 }
 
 #pragma mark - helper methods
 -(void) pullDirectionsToMapItem:(MKMapItem *) mapItem
 {
-
-
-
-
     MKDirectionsRequest *request = [MKDirectionsRequest new];
     request.source = [MKMapItem mapItemForCurrentLocation];
     request.destination = mapItem;
-
-    NSLog(@"curr name %@",request.source.name);
 
     MKDirections *direction =[[MKDirections alloc] initWithRequest:request];
     [direction calculateDirectionsWithCompletionHandler:^(MKDirectionsResponse *response, NSError *error) {
@@ -175,55 +154,36 @@
         NSLog(@"disctance %f travel time %f  %@", theRoute.distance,theRoute.expectedTravelTime, self.selectedBike.bikeSteps);
 
 
-//alertview here due to asyc block
-            NSString *steps = self.selectedBike.bikeSteps;
-            UIAlertView *alertview = [[UIAlertView alloc]
-                                      initWithTitle:@"Directions"
-                                      message:steps
-                                      delegate:self
-                                      cancelButtonTitle:@"OK"
-                                      otherButtonTitles: nil];
-            [alertview show];
+        //alertview here due to asyc block
+        NSString *steps = self.selectedBike.bikeSteps;
+        UIAlertView *alertview = [[UIAlertView alloc]
+                                    initWithTitle:@"Directions"
+                                    message:steps
+                                    delegate:self
+                                    cancelButtonTitle:@"OK"
+                                    otherButtonTitles: nil];
 
+        [alertview show];
 
-
-
-
-        
     }];
     
 }
 
 
-//use location to find placemark
+//use location to find placemark and then mapItem
+//use mapItem to calculate directions/steps from current location to mapItem
 -(void) reverseGeocodeLocation:(CLLocation *) location
 {
     CLGeocoder *geocoder = [CLGeocoder new];
     [geocoder reverseGeocodeLocation:location completionHandler:^(NSArray *placemarks, NSError *error) {
 
         MKPlacemark *placemark = [placemarks objectAtIndex:0];
-
         MKMapItem *mapItem = [[MKMapItem alloc] initWithPlacemark:placemark];
-
-
-        NSLog(@"==PM==%@", placemark.name);
-        NSLog(@"==MI==%@", mapItem.name);
 
         [self pullDirectionsToMapItem:mapItem];
 
     }];
 }
-
-#pragma mark - UISearchbarDelegate
--(void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
-{
-
-}
-
-
-
-
-
 
 
 @end
