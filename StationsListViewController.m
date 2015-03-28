@@ -55,21 +55,7 @@
          self.bikeJSONDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
 
          self.bikeArray = [self.bikeJSONDictionary objectForKey:@"stationBeanList"];
-
-
-//
-//         for(NSDictionary *dic in self.bikeArray){
-//             Bike *bike = [Bike new];
-//             bike.stationName = [dic objectForKey:@"stationName"];
-//             bike.availableBikes =[dic objectForKey:@"availableBikes"];
-//             bike.latitude = [[dic objectForKey:@"latitude"] doubleValue];
-//             bike.longitude = [[dic objectForKey:@"longitude"] doubleValue];
-//             bike.stAddress1 = [dic objectForKey:@"stAddress1"];
-//             bike.city = [dic objectForKey:@"city"];
-//             bike.bikeLocationString =[dic objectForKey:@"location"];
-//        
-         
-         
+     
          
          [self.tableview reloadData];
      }

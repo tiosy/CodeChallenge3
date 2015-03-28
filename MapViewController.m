@@ -27,11 +27,15 @@
     [super viewDidLoad];
 
     self.locationManager = [CLLocationManager new];
-    [self.locationManager requestWhenInUseAuthorization];
+    [self.locationManager requestAlwaysAuthorization];
+
     self.locationManager.delegate = self;
 
     self.mapView.showsUserLocation = YES;
     self.mapView.delegate = self;
+
+
+ //   37.329732###-121.901782
 
     [self addAnnotationWithPoint:self.selectedBike];
 
@@ -47,6 +51,7 @@
     double longitude = bike.longitude;
     double latitude = bike.latitude;
 
+    NSLog(@"%f###%f",latitude,longitude);
 
     MKPointAnnotation *oneAnnotation;
     /////POINT: using latitude,longitude to ADD
@@ -67,12 +72,15 @@
 -(MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
 
-    // now ZOOM in
-    CLLocationCoordinate2D center = annotation.coordinate;
-    MKCoordinateSpan span = MKCoordinateSpanMake(0.2, 0.2);
-    [mapView setRegion:MKCoordinateRegionMake(center, span) animated:YES];
+
 
     if(! [annotation isEqual:self.mapView.userLocation]) {
+
+
+        // now ZOOM in
+        CLLocationCoordinate2D center = annotation.coordinate;
+        MKCoordinateSpan span = MKCoordinateSpanMake(0.5, 0.5);
+        [mapView setRegion:MKCoordinateRegionMake(center, span) animated:YES];
 
         MKPinAnnotationView *pinAnnotation = [[MKPinAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier: nil];
 
@@ -95,7 +103,7 @@
 -(void) mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control
 {
     CLLocationCoordinate2D center = view.annotation.coordinate;
-    MKCoordinateSpan span = MKCoordinateSpanMake(0.05, 0.05);
+    MKCoordinateSpan span = MKCoordinateSpanMake(0.3, 0.3);
     [mapView setRegion:MKCoordinateRegionMake(center, span) animated:YES];
 
 
@@ -110,23 +118,6 @@
     CLLocation *location = [[CLLocation alloc] initWithLatitude:latitude longitude:longitude];
 
     [self reverseGeocodeLocation:location];
-
-
-
-
-
-
-
-
-    NSString *steps = self.selectedBike.bikeSteps;
-    UIAlertView *alertview = [[UIAlertView alloc]
-                              initWithTitle:steps
-                              message:@""
-                              delegate:self
-                              cancelButtonTitle:@"OK"
-                              otherButtonTitles: nil];
-    [alertview show];
-
 
 }
 
@@ -154,9 +145,15 @@
 #pragma mark - helper methods
 -(void) pullDirectionsToMapItem:(MKMapItem *) mapItem
 {
+
+
+
+
     MKDirectionsRequest *request = [MKDirectionsRequest new];
     request.source = [MKMapItem mapItemForCurrentLocation];
     request.destination = mapItem;
+
+    NSLog(@"curr name %@",request.source.name);
 
     MKDirections *direction =[[MKDirections alloc] initWithRequest:request];
     [direction calculateDirectionsWithCompletionHandler:^(MKDirectionsResponse *response, NSError *error) {
@@ -175,7 +172,23 @@
         self.selectedBike.bikeSteps = stepString;
         self.selectedBike.distance = theRoute.distance;
 
-        NSLog(@"disctance %f travel time %f", theRoute.distance,theRoute.expectedTravelTime);
+        NSLog(@"disctance %f travel time %f  %@", theRoute.distance,theRoute.expectedTravelTime, self.selectedBike.bikeSteps);
+
+
+//alertview here due to asyc block
+            NSString *steps = self.selectedBike.bikeSteps;
+            UIAlertView *alertview = [[UIAlertView alloc]
+                                      initWithTitle:@"Directions"
+                                      message:steps
+                                      delegate:self
+                                      cancelButtonTitle:@"OK"
+                                      otherButtonTitles: nil];
+            [alertview show];
+
+
+
+
+
         
     }];
     

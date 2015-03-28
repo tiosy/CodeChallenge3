@@ -91,14 +91,14 @@
 		938C35E519F02E16000F4F50 /* CodeChallenge3 */ = {
 			isa = PBXGroup;
 			children = (
+				938C35EA19F02E16000F4F50 /* AppDelegate.h */,
 				938C35EB19F02E16000F4F50 /* AppDelegate.m */,
-				938C360C19F02F62000F4F50 /* StationsListViewController.h */,
-				938C360D19F02F62000F4F50 /* StationsListViewController.m */,
 				6E0B2D7D1AC5BB1D008A7831 /* Bike.h */,
 				6E0B2D7E1AC5BB1D008A7831 /* Bike.m */,
+				938C360C19F02F62000F4F50 /* StationsListViewController.h */,
+				938C360D19F02F62000F4F50 /* StationsListViewController.m */,
 				938C360F19F02F6E000F4F50 /* MapViewController.h */,
 				938C361019F02F6E000F4F50 /* MapViewController.m */,
-				938C35EA19F02E16000F4F50 /* AppDelegate.h */,
 				938C35F019F02E16000F4F50 /* Main.storyboard */,
 				938C35F319F02E16000F4F50 /* Images.xcassets */,
 				938C35F519F02E16000F4F50 /* LaunchScreen.xib */,

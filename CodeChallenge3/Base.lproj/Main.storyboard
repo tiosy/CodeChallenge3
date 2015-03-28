@@ -88,10 +88,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="YIn-dz-STz">
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" showsUserLocation="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YIn-dz-STz">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <connections>
-                                    <outlet property="delegate" destination="ZMW-PU-gdT" id="k8l-AZ-cln"/>
+                                    <outlet property="delegate" destination="ZMW-PU-gdT" id="elf-PW-XQp"/>
                                 </connections>
                             </mapView>
                         </subviews>
@@ -104,7 +104,7 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="mapView" destination="YIn-dz-STz" id="Mxo-un-7rg"/>
+                        <outlet property="mapView" destination="YIn-dz-STz" id="fjg-Bf-y6M"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BKN-QN-qcz" userLabel="First Responder" sceneMemberID="firstResponder"/>
