@@ -28,41 +28,78 @@
 @property NSMutableArray *bikeArray; // for tableview (ALL)
 @property NSMutableArray *filteredBikeArray; // for tableview (Filtered)
 
+
 @property Bike *bike;
 
 @property (weak, nonatomic) IBOutlet UISearchBar *searchbar;
 @property BOOL isFiltered;
+@property BOOL isAscending;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *sortButton;
 
 @end
 
 @implementation StationsListViewController
 
+
+
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
 
+
+    //locationManager: request Auth, update location to get User Location (aka Current Location)
     self.locationManager = [CLLocationManager new];
     [self.locationManager requestAlwaysAuthorization];
     self.locationManager.delegate = self;
 
-    //get the user location
-    [self.locationManager startUpdatingLocation];
 
-    //
     self.bikeArray = [NSMutableArray new];
     self.filteredBikeArray = [NSMutableArray new];
     self.isFiltered = NO;
-    
-
-    [self performBikeAPI];
+    self.isAscending=YES;
 }
+
+
+#pragma mark - CLLocationManagerDelegate>
+-(void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
+{
+    NSLog(@"status %d", status);
+
+    if(status == kCLAuthorizationStatusNotDetermined){
+        NSLog(@"status %d", status);
+    }else{
+        NSLog(@"status %d", status);
+        [self.locationManager startUpdatingLocation];
+        [self performBikeAPI];
+    }
+
+
+
+}
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
+{
+    NSLog(@"^^^^^^^%@^^^^%ld",locations, locations.count);
+
+    for (CLLocation *location in locations) {
+        if(location.verticalAccuracy < 50 && location.horizontalAccuracy < 50)
+        {
+            self.userLocation = location;
+            [self.locationManager stopUpdatingLocation];
+        }
+
+    }
+    
+}
+
+
+
+
+
 
 #pragma mark - helper methods
 
 -(void) performBikeAPI
 {
     NSString *string = @"http://www.bayareabikeshare.com/stations/json";
-    // NSString *string = @"https://s3.amazonaws.com/mobile-makers-lib/bus.json";
 
     NSURL *url = [NSURL URLWithString:string];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
@@ -98,13 +135,6 @@
              NSLog(@"%@ ==%f\n",bike.stationName,bike.distance);
         }
              
-
-
-
-
-
-
-
          //since this Block, a async process, needs to reload tableview
          [self.tableView reloadData];
      }
@@ -154,7 +184,7 @@
 
 
     cell.textLabel.text = bike.stationName;
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"Available bikes: %@",[bike.availableBikes stringValue]];
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"Distance: %.2f, Available bikes: %@ ",bike.distance,[bike.availableBikes stringValue]];
 
     return cell;
 }
@@ -191,24 +221,6 @@
 
 
 
-#pragma mark - CLLocationManagerDelegate>
-
--(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
-{
-    NSLog(@"^^^^^^^%@^^^^%ld",locations, locations.count);
-
-    for (CLLocation *location in locations) {
-        if(location.verticalAccuracy < 50 && location.horizontalAccuracy < 50)
-        {
-            self.userLocation = location;
-
-            [self.locationManager stopUpdatingLocation];
-        }
-        
-    }
-    
-}
-
 #pragma mark - helper methods
 -(CLLocationDistance) getDistanceFromUserLocationToBikeStation:(double) latitude longitude:(double) longitude
 {
@@ -216,8 +228,45 @@
     CLLocation *location = [[CLLocation alloc] initWithLatitude:latitude longitude:longitude];
     CLLocationDistance distance = [self.userLocation distanceFromLocation:location];
 
+    NSLog(@"latitude %f ====longitude %f",self.userLocation.coordinate.latitude,self.userLocation.coordinate.longitude);
+
     return  distance;
 
 }
+
+#pragma mark - sort tableview  with distance
+- (IBAction)sortTableByDistance:(id)sender {
+
+    if(self.isAscending)
+    { self.sortButton.title = @"Sort Descending";}
+    else
+    { self.sortButton.title =@"Sort Ascending";}
+
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"distance" ascending:self.isAscending];
+    NSArray *sortDescriptors = @[sortDescriptor];
+    NSArray *sortedArray = [self.bikeArray sortedArrayUsingDescriptors:sortDescriptors];
+
+    //allow user to sort with ascending or descending distance
+    self.isAscending = !self.isAscending;
+
+
+
+    if(self.isFiltered){
+        sortedArray = [self.filteredBikeArray sortedArrayUsingDescriptors:sortDescriptors];
+        self.filteredBikeArray = [NSMutableArray new];
+        self.filteredBikeArray = [NSMutableArray arrayWithArray:sortedArray];
+    }
+    else{
+        sortedArray = [self.bikeArray sortedArrayUsingDescriptors:sortDescriptors];
+        self.bikeArray = [NSMutableArray new];
+        self.bikeArray = [NSMutableArray arrayWithArray:sortedArray];
+    }
+
+
+    [self.tableView reloadData];
+
+
+}
+
 
 @end

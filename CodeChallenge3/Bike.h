@@ -16,9 +16,10 @@
 @property double longitude;
 @property NSString *stAddress1;
 @property NSString *city;
-@property NSString *bikeLocationString;
 @property NSString *bikeSteps;
+@property NSString *bikeLocation;
 @property double distance;
 
+-(instancetype)initWithDictionary:(NSDictionary *) dic;
 
 @end
