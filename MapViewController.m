@@ -26,10 +26,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    self.locationManager = [CLLocationManager new];
-    [self.locationManager requestAlwaysAuthorization];
-
-    self.locationManager.delegate = self;
+//    Has done in Root VC ..no need to set here
+//    self.locationManager = [CLLocationManager new];
+//    [self.locationManager requestAlwaysAuthorization];
+//    self.locationManager.delegate = self;
 
     self.mapView.showsUserLocation = YES;
     self.mapView.delegate = self;
@@ -43,23 +43,20 @@
 
 -(void) addAnnotationWithPoint: (Bike *) bike
 {
-
-
-    NSString *locationName = bike.bikeLocation;
     double longitude = bike.longitude;
     double latitude = bike.latitude;
 
-    NSLog(@"%f###%f",latitude,longitude);
+    MKPointAnnotation *oneAnnotation = [MKPointAnnotation new];
 
-    MKPointAnnotation *oneAnnotation;
-    /////POINT: using latitude,longitude to ADD
-    CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude,longitude);
     oneAnnotation = [MKPointAnnotation new];
+    oneAnnotation.title = bike.stationName;
+    oneAnnotation.subtitle = [NSString stringWithFormat:@"Available bikes: %@",[bike.availableBikes stringValue]];
 
-    oneAnnotation.title = locationName;
-
-   // oneAnnotation.subtitle = ;
+    // POINT: using latitude,longitude to ADD
+    CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake(latitude,longitude);
     oneAnnotation.coordinate = coordinate;
+
+    //add one annotation
     [self.mapView addAnnotation:oneAnnotation];
 }
 
@@ -70,10 +67,7 @@
 -(MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
 
-
-
     if(! [annotation isEqual:self.mapView.userLocation]) {
-
 
         // now ZOOM in
         CLLocationCoordinate2D center = annotation.coordinate;
@@ -84,9 +78,12 @@
 
         pinAnnotation.image = [UIImage imageNamed:@"bikeImage"];
 
+
         // show title
         pinAnnotation.canShowCallout = YES;
         pinAnnotation.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+        UIImageView *leftImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bikeImage"]];
+        pinAnnotation.leftCalloutAccessoryView = leftImage;
 
         return pinAnnotation;
 
@@ -97,6 +94,13 @@
 
 }
 
+
+-(void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
+{
+    //just testing
+    NSLog(@"***** annotation: you are selected");
+}
+
 //ZOOM in and SPAN out
 -(void) mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control
 {
@@ -104,28 +108,38 @@
     MKCoordinateSpan span = MKCoordinateSpanMake(0.3, 0.3);
     [mapView setRegion:MKCoordinateRegionMake(center, span) animated:YES];
 
-
     double latitude = self.selectedBike.latitude;
     double longitude = self.selectedBike.longitude;
 
-    NSLog(@"selected latitude %f", latitude);
-    NSLog(@"selected longitude %f", longitude);
-
-
     //Creat CLLocation with latitude and logitude
+    //put AlertView inside pullDirectionsToMapItem
+    // due to async block in pullDirectionsToMapItem
     CLLocation *location = [[CLLocation alloc] initWithLatitude:latitude longitude:longitude];
     [self reverseGeocodeLocation:location];
 
 }
 
-#pragma mark AlertView
-#pragma mark AlertView's UIAlertViewDelegate Protocol
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+//use location to find placemark and then mapItem
+//use mapItem to calculate directions/steps from current location to mapItem
+-(void) reverseGeocodeLocation:(CLLocation *) location
 {
-    //no action , just display actionview in this project
+    CLGeocoder *geocoder = [CLGeocoder new];
+    [geocoder reverseGeocodeLocation:location completionHandler:^(NSArray *placemarks, NSError *error) {
+
+        MKPlacemark *placemark = [placemarks objectAtIndex:0];
+        MKMapItem *mapItem = [[MKMapItem alloc] initWithPlacemark:placemark];
+
+        [self pullDirectionsToMapItem:mapItem];
+        
+    }];
 }
 
+
+
+
 #pragma mark - helper methods
+//get directions/steps with mapItem
+// alertview inside the block to show steps
 -(void) pullDirectionsToMapItem:(MKMapItem *) mapItem
 {
     MKDirectionsRequest *request = [MKDirectionsRequest new];
@@ -149,7 +163,7 @@
         self.selectedBike.bikeSteps = stepString;
         self.selectedBike.distance = theRoute.distance;
 
-        NSLog(@"disctance %f travel time %f  %@", theRoute.distance,theRoute.expectedTravelTime, self.selectedBike.bikeSteps);
+        //NSLog(@"disctance %f travel time %f  %@", theRoute.distance,theRoute.expectedTravelTime, self.selectedBike.bikeSteps);
 
 
         //alertview here due to asyc block
@@ -167,21 +181,10 @@
     
 }
 
-
-//use location to find placemark and then mapItem
-//use mapItem to calculate directions/steps from current location to mapItem
--(void) reverseGeocodeLocation:(CLLocation *) location
+#pragma mark AlertView
+#pragma mark AlertView's UIAlertViewDelegate Protocol
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    CLGeocoder *geocoder = [CLGeocoder new];
-    [geocoder reverseGeocodeLocation:location completionHandler:^(NSArray *placemarks, NSError *error) {
-
-        MKPlacemark *placemark = [placemarks objectAtIndex:0];
-        MKMapItem *mapItem = [[MKMapItem alloc] initWithPlacemark:placemark];
-
-        [self pullDirectionsToMapItem:mapItem];
-
-    }];
+    //no action , just display actionview in this project
 }
-
-
 @end

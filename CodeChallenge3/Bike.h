@@ -17,7 +17,7 @@
 @property NSString *stAddress1;
 @property NSString *city;
 @property NSString *bikeSteps;
-@property NSString *bikeLocation;
+@property NSString *bikeLocation; //maybe empty
 @property double distance;
 
 -(instancetype)initWithDictionary:(NSDictionary *) dic;

@@ -50,6 +50,7 @@
     self.locationManager = [CLLocationManager new];
     [self.locationManager requestAlwaysAuthorization];
     self.locationManager.delegate = self;
+    [self.locationManager startUpdatingLocation];
 
 
     self.bikeArray = [NSMutableArray new];
@@ -62,14 +63,13 @@
 #pragma mark - CLLocationManagerDelegate>
 -(void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
 {
-    NSLog(@"status %d", status);
-
     if(status == kCLAuthorizationStatusNotDetermined){
-        NSLog(@"status %d", status);
+        NSLog(@"not determ status %d", status);
     }else{
         NSLog(@"status %d", status);
         [self.locationManager startUpdatingLocation];
-        [self performBikeAPI];
+
+        [self pullBikeStationDataFromAPI];
     }
 
 
@@ -77,12 +77,12 @@
 }
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
-    NSLog(@"^^^^^^^%@^^^^%ld",locations, locations.count);
-
     for (CLLocation *location in locations) {
-        if(location.verticalAccuracy < 50 && location.horizontalAccuracy < 50)
+        if(location.verticalAccuracy < 1000 && location.horizontalAccuracy < 1000)
         {
             self.userLocation = location;
+
+            NSLog(@"in didUpdate: lat %f long %f",self.userLocation.coordinate.latitude,self.userLocation.coordinate.longitude);
             [self.locationManager stopUpdatingLocation];
         }
 
@@ -97,7 +97,7 @@
 
 #pragma mark - helper methods
 
--(void) performBikeAPI
+-(void) pullBikeStationDataFromAPI
 {
     NSString *string = @"http://www.bayareabikeshare.com/stations/json";
 
@@ -183,7 +183,8 @@
          bike = [self.bikeArray objectAtIndex:indexPath.row];
 
 
-    cell.textLabel.text = bike.stationName;
+   // cell.textLabel.text = bike.stationName;
+    cell.textLabel.text = bike.stAddress1;
     cell.detailTextLabel.text = [NSString stringWithFormat:@"Distance: %.2f, Available bikes: %@ ",bike.distance,[bike.availableBikes stringValue]];
 
     return cell;
@@ -228,7 +229,7 @@
     CLLocation *location = [[CLLocation alloc] initWithLatitude:latitude longitude:longitude];
     CLLocationDistance distance = [self.userLocation distanceFromLocation:location];
 
-    NSLog(@"latitude %f ====longitude %f",self.userLocation.coordinate.latitude,self.userLocation.coordinate.longitude);
+    NSLog(@"===============USER LOC:latitude %f ====longitude %f",self.userLocation.coordinate.latitude,self.userLocation.coordinate.longitude);
 
     return  distance;
 
